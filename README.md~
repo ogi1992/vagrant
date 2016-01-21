@@ -1,0 +1,78 @@
+#Installing Vagrant Box
+The Vagrant box definition here provides a server with MySQL, Cassandra and ElasticSearch pre-installed.
+The DB Servers are available at their standard ports and with MySQL user paswword as "root".
+Once the box is running you can then connect the application.properties to the standard ports for each service.
+
+The following are the steps to get started.
+ 1. Install virtualbox-5.0_5.0.10-104061-Ubuntu-trusty_amd64 (https://www.virtualbox.org/wiki/Download_Old_Builds_5_0)
+ 2. Install vagrant_1.8.1_x86_64 (https://releases.hashicorp.com/vagrant/1.8.1/) and then run: vagrant plugin install vagrant-vbguest
+ 3. Create a directory from which you will run the box 
+ 4. Place the "Vagrantfile" and the "bootstrap.sh" file in the directory
+ 5. From that directory, run:
+    1. wget http://downloads.datastax.com/community/dsc-cassandra-2.2.4-bin.tar.gz
+    2. tar -zxvf dsc-cassandra-2.2.4-bin.tar.gz
+ 6. Run "vagrant up"
+
+The first time you run it will take a bit longer as it sets up the box
+Run "vagrant ssh" to ssh into the box.
+
+For accessing Elasticsearch:
+
+http://192.168.23.23:9200/_plugin/head/
+
+For Cassandra:
+
+cd dsc-cassandra-2.2.4/bin
+./cqlsh 192.168.23.23 9042
+
+For Mysql:
+
+apt-get install mysql-client on host machine if you don't already have it installed.
+mysql -h 192.168.23.23 -uroot -proot
+
+For PhpMyAdmin:
+
+http://192.168.23.23/phpmyadmin/
+
+user/pass = root/root
+
+If you make any updates to the server please do update the boostrap file too if you can. If not please contact Bal with required changes.
+
+# ViperaAnalytics - How To Get Started
+---
+1. Install environment requirements:
+    1. Oracle Java 1.8
+    2. Latest Spring Tools Suite or IntelliJ IDEA
+    3. Gradle (optional)
+    4. Git (add to path)
+2. Configure Git SSH key for GitHub access ([Like This](https://help.github.com/articles/generating-ssh-keys)) or use https ([Like This](http://stackoverflow.com/questions/5343068/is-there-a-way-to-skip-password-typing-when-using-https-github/5343146#5343146))
+3. Clone ViperaAnalytics GitHub master repository to your local machine in one of two ways:
+    * Git clone from command line 
+``
+git clone https://github.com/BalLab/ViperaAnalytics.git <your_local_project_directory>
+``
+    * Clone using IntelliJ IDEA
+4. Import project into IDEA
+5. Set application properties and build databases 
+    1. Create a copy of application.loc.properties.template file in the same directory with the name application.loc.properties
+    2. Update the application.loc.properties and gradle.properties files with your local settings
+> **Note:** To run only Management Interface without the Cashback application, remove the ``cashback`` profile from the list of active spring profiles (e.g. *spring.profiles.active=rmi,dev*)
+
+    3. Create a copy of application.test.properties.template file in the same directory with the name application.test.properties
+    4.. Run the ``./gradlew setupProject`` command
+    
+        > **Note:** This will copy the appropriate application properties file to ``/src/main/resources``, build the required databases and populate them with data. If you copied the application properties file manually, you can run ``./gradlew setupDB`` to create databases. Similarly, if you do not want to build the databases, or have them already, you can run ``./gradlew setupProperties`` to create/update application properties
+5. Create the resources folder structure on your machine in the ``docker/tomcat8_server/applications_folders`` directory ( **system.directory.resources** property)
+    * /images/offerImages
+    * /images/merchantLogos
+    * /images/couponImages
+6. Create the folder structure from step 5. anywhere on your machine, and update the **system.directory.resources** property in `src/test/resources/application.properties` to point to the parent of the newly created directories. These directories will be used during testing.
+
+7. To run project, vagrant has to be started (vagrant up) and then run tomcatRun command.
+
+# Testing
+---
+To run tests: 
+
+1. Run the `./gradlew test` command to start the tests
+
